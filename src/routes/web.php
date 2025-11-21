@@ -1,15 +1,28 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LinkController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RedirectController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome'); // later: marketing page
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Auth routes (from Breeze)
+require __DIR__.'/auth.php';
+
+// Protected routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::resource('links', LinkController::class)->except(['show']);
+
+    Route::get('/links/{link}/qr', [LinkController::class, 'qr'])
+        ->name('links.qr');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -17,4 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+// Public redirect
+Route::get('/r/{code}', [RedirectController::class, 'handle'])
+    ->name('redirect.handle');
