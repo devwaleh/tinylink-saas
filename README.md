@@ -99,7 +99,7 @@ php artisan migrate
 
 Start local development server:
 
-php artisan serve
+composer run dev
 
 🧩 Environment Variables
 
